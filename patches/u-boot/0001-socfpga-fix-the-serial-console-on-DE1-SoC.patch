@@ -1,0 +1,35 @@
+From 08327f6b64d6b57b20374a9024266983eb1a7557 Mon Sep 17 00:00:00 2001
+From: Jade Lovelace <lists@jade.fyi>
+Date: Fri, 10 Feb 2023 17:14:45 -0800
+Subject: [PATCH 1/2] socfpga: fix the serial console on DE1-SoC
+
+Previously, the TX LED would flash but nothing would appear on the
+serial port, and the board would appear dead with a build of the
+socfpga_cyclone5_defconfig. I have verified that adding the frequency to
+the uart will fix the serial console on my board.
+
+Thanks to @ehoffman on the Rocketboards forum:
+https://forum.rocketboards.org/t/cyclonev-programming-fpga-from-u-boot/2230/30
+
+Series-to: u-boot@lists.denx.de
+
+Signed-off-by: Jade Lovelace <lists@jade.fyi>
+---
+ arch/arm/dts/socfpga_cyclone5_de1_soc.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/socfpga_cyclone5_de1_soc.dts b/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
+index ff1e61e0cb..b71496bfb5 100644
+--- a/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
++++ b/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
+@@ -75,6 +75,7 @@
+ };
+ 
+ &uart0 {
++	clock-frequency = <100000000>;
+ 	u-boot,dm-pre-reloc;
+ };
+ 
+-- 
+2.39.1
+

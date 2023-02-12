@@ -1,0 +1,24 @@
+From 04841e25227806ce90aea7669865522da966843f Mon Sep 17 00:00:00 2001
+From: Jade Lovelace <lists@jade.fyi>
+Date: Fri, 10 Feb 2023 18:20:55 -0800
+Subject: [PATCH 2/2] Enable the watchdog; is this a good idea?
+
+---
+ arch/arm/dts/socfpga_cyclone5_de1_soc.dts | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/arch/arm/dts/socfpga_cyclone5_de1_soc.dts b/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
+index b71496bfb5..1cef1c2e8a 100644
+--- a/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
++++ b/arch/arm/dts/socfpga_cyclone5_de1_soc.dts
+@@ -78,7 +78,3 @@
+ 	clock-frequency = <100000000>;
+ 	u-boot,dm-pre-reloc;
+ };
+-
+-&watchdog0 {
+-	status = "disabled";
+-};
+-- 
+2.39.1
+

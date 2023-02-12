@@ -1,0 +1,27 @@
+From 3ffba8f50ab1f5658575c4f1015829bf283026c8 Mon Sep 17 00:00:00 2001
+From: Jade Lovelace <lists@jade.fyi>
+Date: Tue, 7 Feb 2023 23:36:14 -0800
+Subject: [PATCH] Fix compilation; _nocache variants are gone since 2019
+
+https://lore.kernel.org/lkml/20191209135823.28465-3-hch@lst.de/
+Signed-off-by: Jade Lovelace <lists@jade.fyi>
+---
+ arch/arm/mach-socfpga/fpga-dma.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-socfpga/fpga-dma.c b/arch/arm/mach-socfpga/fpga-dma.c
+index 23ed0a0d8e28..3d62a3722044 100644
+--- a/arch/arm/mach-socfpga/fpga-dma.c
++++ b/arch/arm/mach-socfpga/fpga-dma.c
+@@ -568,7 +568,7 @@ static void __iomem *request_and_map(struct platform_device *pdev,
+ 		return NULL;
+ 	}
+ 
+-	ptr = devm_ioremap_nocache(&pdev->dev, res->start, resource_size(res));
++	ptr = devm_ioremap(&pdev->dev, res->start, resource_size(res));
+ 	if (!ptr)
+ 		dev_err(&pdev->dev, "ioremap_nocache of %s failed!", res->name);
+ 
+-- 
+2.39.1
+
