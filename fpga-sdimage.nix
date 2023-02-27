@@ -16,7 +16,8 @@
 
   sdImage = {
     compressImage = false;
-    expandOnBoot = false;
+    # expand the rootfs on initial boot
+    expandOnBoot = true;
     bootloaderSpl = "${pkgs.u-boot-socfpga}/u-boot-with-spl.sfp";
     populateRootCommands = ''
       mkdir -p ./files/boot

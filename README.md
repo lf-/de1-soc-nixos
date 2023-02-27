@@ -5,6 +5,33 @@
 I don't want to learn Yocto, and it seems like Nix is the easy way to build a
 custom Linux image with patches.
 
+## Important notes
+
+I have commented out the FPGA loading in `bootScript.nix`, since I don't have a
+suitable FPGA image to offer. For this purpose I suggest starting from the
+DE1-SoC GHRD [from the CD][de1-cd], as it contains various things that are not
+conveniently written down such as DDR3 timings and so on, which it has
+conveniently put into the qsys file for you, along with all the various wires
+you have to do in the top level file.
+
+I will note that the top level file in there does use some very old IP and
+functionality. It's likely some of it could be cleaned up if one were
+so motivated, but start from it since it definitely works.
+
+[de1-cd]: https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=836&PartNo=4
+
+## Hardware setup
+
+Set MSEL to `4'b0000`: all DIP switches "ON" (sic!). This enables u-boot to
+program the FPGA fabric.
+
+Per the DE1-SoC manual:
+
+> "FPGA configured from HPS software: U-Boot, with FPPx16 image stored on the
+> SD card, like LXDE Desktop or console Linux with frame buffer edition."
+
+Source: https://forum.rocketboards.org/t/cyclonev-programming-fpga-from-u-boot/2230/24
+
 ## What is going on here?
 
 This is lightly based off of the [Cyclone V SoC
@@ -33,8 +60,10 @@ into memory (the tiny OCRAM, not DDR3) and jump to. There are four copies of
 the second phase loader/"preloader" (U-Boot SPL) in this partition.
 
 U-Boot SPL will configure various devices, initialize the SDRAM and then start
-U-Boot, which is also on the same partition. U-Boot will then load the Linux
-kernel image and initrd off the root disk using the extlinux mechanism.
+U-Boot, which is also on the same partition.
+
+U-Boot will execute `/boot/u-boot.scr`, enable the FPGA bridge, then load the
+kernel image and initrd per `/boot/extlinux/extlinux.conf`.
 
 > **Note**: Currently I use the device tree from U-Boot which will continue
 > into Linux. This is subject to revision, since it seems annoying to put that
@@ -86,14 +115,6 @@ DE1-SoC that render the system unusable:
 
 ### Known bugs
 
-* Currently U-Boot reports that its environment file is corrupt. I assume I'm
-  doing something wrong, but this means that getting the system to boot
-  involves typing `run bootcmd_mmc0` at the U-Boot prompt manually, at the
-  moment.
-
-  This will be fixed Eventually, but this needs to ship for a class project
-  promptly and I don't have time right now. I wouldn't mind a PR fixing it but
-  I will fix this eventually.
 * I haven't done anything about the fact that the Nix setup is kinda hardcoded
   to x86_64-linux right now. Just patch it if you are building from a more fun
   architecture.
