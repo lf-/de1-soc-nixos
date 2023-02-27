@@ -5,33 +5,6 @@
 I don't want to learn Yocto, and it seems like Nix is the easy way to build a
 custom Linux image with patches.
 
-## Important notes
-
-I have commented out the FPGA loading in `bootScript.nix`, since I don't have a
-suitable FPGA image to offer. For this purpose I suggest starting from the
-DE1-SoC GHRD [from the CD][de1-cd], as it contains various things that are not
-conveniently written down such as DDR3 timings and so on, which it has
-conveniently put into the qsys file for you, along with all the various wires
-you have to do in the top level file.
-
-I will note that the top level file in there does use some very old IP and
-functionality. It's likely some of it could be cleaned up if one were
-so motivated, but start from it since it definitely works.
-
-[de1-cd]: https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=836&PartNo=4
-
-## Hardware setup
-
-Set MSEL to `4'b0000`: all DIP switches "ON" (sic!). This enables u-boot to
-program the FPGA fabric.
-
-Per the DE1-SoC manual:
-
-> "FPGA configured from HPS software: U-Boot, with FPPx16 image stored on the
-> SD card, like LXDE Desktop or console Linux with frame buffer edition."
-
-Source: https://forum.rocketboards.org/t/cyclonev-programming-fpga-from-u-boot/2230/24
-
 ## What is going on here?
 
 This is lightly based off of the [Cyclone V SoC
@@ -111,7 +84,22 @@ DE1-SoC that render the system unusable:
   This is not the best way to fix this, and it is likely that we will start
   using device trees shipped by NixOS instead.
 
-## Usage
+# Usage
+
+## Important notes
+
+I have commented out the FPGA loading in `bootScript.nix`, since I don't have a
+suitable FPGA image to offer. For this purpose I suggest starting from the
+DE1-SoC GHRD [from the CD][de1-cd], as it contains various things that are not
+conveniently written down such as DDR3 timings and so on, which it has
+conveniently put into the qsys file for you, along with all the various wires
+you have to do in the top level file.
+
+I will note that the top level file in there does use some very old IP and
+functionality. It's likely some of it could be cleaned up if one were
+so motivated, but start from it since it definitely works.
+
+[de1-cd]: https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=836&PartNo=4
 
 ### Known bugs
 
@@ -119,14 +107,26 @@ DE1-SoC that render the system unusable:
   to x86_64-linux right now. Just patch it if you are building from a more fun
   architecture.
 
-### Program to SD
+## Hardware setup
+
+Set MSEL to `4'b0000`: all DIP switches "ON" (sic!). This enables u-boot to
+program the FPGA fabric.
+
+Per the DE1-SoC manual:
+
+> "FPGA configured from HPS software: U-Boot, with FPPx16 image stored on the
+> SD card, like LXDE Desktop or console Linux with frame buffer edition."
+
+Source: https://forum.rocketboards.org/t/cyclonev-programming-fpga-from-u-boot/2230/24
+
+## Program to SD
 
 ```
 $ nix build .#sdImage
 $ sudo dd of=/dev/YOUR_SD_CARD_PROBABLY_mmcblk0 if=result/sd-image/nixos-*.img bs=1M status=progress
 ```
 
-### Connect to serial
+## Connect to serial
 
 Attach your computer to the *mini USB* on the board (*not* the USB type B; that
 one is JTAG).
@@ -135,7 +135,31 @@ one is JTAG).
 $ picocom -q -b 115200 /dev/ttyUSB0
 ```
 
-### It works!
+## Deploying via the network
+
+Add your ssh keys to the configuration for root:
+
+```nix
+{
+  # ...
+  users.users.root = {
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNldAg4t13/i69TD786The+U3wbiNUdW2Kc9KNWvEhgpf4y4x4Sft0oYfkPw5cjX4H3APqfD+b7ItAG0GCbwHw6KMYPoVMNK08zBMJUqt1XExbqGeFLqBaeqDsmEAYXJRbjMTAorpOCtgQdoCKK/DvZ51zUWXxT8UBNHSl19Ryv5Ry5VVdbAE35rqs57DQ9+ma6htXnsBEmmnC+1Zv1FE956m/OpBTId50mor7nS2FguAtPZnDPpTd5zl9kZmJEuWCrmy6iinw5V4Uy1mLeZkQv+/FtozbyifCRCvps9nHpv4mBSU5ABLgnRRvXs+D41Jx7xloNADr1nNgpsNrYaTh hed-bot-ssh-tpm-rsa"
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKYljH8iPMrH00lOb3ETxRrZimdKzPPEdsJQ5D5ovtOwAAAACnNzaDpzc2hrZXk= ssh:sshkey"
+    ];
+  };
+}
+```
+
+Then you can use `deploy your-de1-ip-address` to deploy.
+
+This desugars to:
+
+```
+NIX_SSHOPTS="-l root" nixos-rebuild switch --target-host your-de1-ip-address --fast --flake .#fpga
+```
+
+## It works!
 
 ```
 U-Boot SPL 2022.04 (Jan 01 1980 - 00:00:00 +0000)
