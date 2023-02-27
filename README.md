@@ -101,6 +101,11 @@ so motivated, but start from it since it definitely works.
 
 [de1-cd]: https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&No=836&PartNo=4
 
+See also: https://github.com/u-boot/u-boot/blob/master/doc/README.socfpga
+
+To build a `.rbf` image which you need to program the FPGA in u-boot, use
+`quartus_cpf -c whatever.sof whatever.rbf`.
+
 ### Known bugs
 
 * I haven't done anything about the fact that the Nix setup is kinda hardcoded
